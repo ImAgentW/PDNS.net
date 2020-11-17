@@ -1,0 +1,29 @@
+﻿@using System.Globalization
+
+<table class="table">
+    <tbody>
+        @{
+            Dictionary<string, int> Countries = ViewBag.Countries;
+            int IPCount = Countries.Values.Sum();
+            if(IPCount > 0)
+            foreach (var country in Countries)
+            {
+                <tr>
+                    <td class="d-none">@country.Key</td>
+                    <td>
+                        <div class="flag">
+                            <img src="../assets/img/flags/@(country.Key == "private" ? "private" : country.Key).png" alt="private network">
+                        </div>
+                    </td>
+                    <td>@(country.Key == "private" ? "Private Network" : new RegionInfo(country.Key).EnglishName)</td>
+                    <td class="text-right">
+                        @country.Value
+                    </td>
+                    <td class="text-right">
+                        @(country.Value * 100 / IPCount)%
+                    </td>
+                </tr>
+                }
+            }
+    </tbody>
+</table>

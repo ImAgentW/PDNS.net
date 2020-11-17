@@ -1,0 +1,212 @@
+﻿@model IEnumerable<PDNS.net.Models.User>
+@using User = PDNS.net.Models.User;
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Manage Your Users</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="multi-filter-select" class="display table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Id)</th>
+                        <th>@Html.DisplayNameFor(model => model.Name)</th>
+                        <th>@Html.DisplayNameFor(model => model.UserName)</th>
+                        <th>@Html.DisplayNameFor(model => model.Email)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.UserName)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                            <td>
+                                <div class="form-button-action">
+                                    <a data-toggle="modal" data-target="#edit-user-modal" class="btn btn-link btn-primary btn-lg"
+                                       data-original-title="Edit" data-id="@Html.DisplayFor(modelItem => item.Id)">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a asp-controller="Users" asp-action="Delete" asp-route-id="@item.Id"
+                                       data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal" tabindex="-1" role="dialog" id="edit-user-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div data-background-color="dark2" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <a class="close btn btn-link btn-primary btn-lg" data-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </a>
+            </div>
+            <div class="modal-body">
+                <form id="edit-user-form" asp-controller="Users" asp-action="Edit" method="POST">
+                    <div class="d-none">
+                        <label>ID</label>
+                        <input id="ID" name="ID" type="hidden" class="form-control" value="" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input id="Name" name="Name" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input id="Username" name="Username" type="text" class="form-control">
+                    </div>
+                    <div class="form-group mx-auto">
+                        <label>Email</label>
+                        <input id="Email" name="Email" type="email" class="form-control">
+                    </div>
+                    <div class="form-group mx-auto">
+                        <label>Password</label>
+                        <input id="Password" name="Password" type="password" class="form-control" disabled="disabled">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" name="ModifyPassword">
+                                <span class="form-check-sign">Modify Password</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="$('#edit-user-form').submit();">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Datatables -->
+    <script src="~/assets/js/plugin/datatables/datatables.min.js"></script>
+    <!-- Sweet Alert -->
+    <script src="~/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <script>
+        $('#multi-filter-select').DataTable({
+            "pageLength": 10
+        });
+
+        $('button[data-original-title="Remove"]').on('click', function (e) {
+            let domain = $(e).parent().first().html();
+            window.open('/Remove/' + domain, '_self');
+        });
+
+        $('#edit-user-modal').on('show.bs.modal', function (event) {
+            let button = $(event.relatedTarget);
+            let recipient = button.data('id');
+            let modal = $(this);
+            let a = button.closest('tr').children('td');
+            modal.find('.modal-title').text('Edit User #' + recipient);
+            modal.find('#ID').val(a[0].innerHTML);
+            modal.find('#Name').val(a[1].innerHTML);
+            modal.find('#Username').val(a[2].innerHTML);
+            modal.find('#Email').val(a[3].innerHTML);
+        });
+
+        $('[data-original-title="Remove"]').on('click', (e) => {
+            e.preventDefault();
+            swal({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        text: 'Yes, delete it!',
+                        className: 'btn btn-success'
+                    },
+                    cancel: {
+                        visible: true,
+                        className: 'btn btn-danger'
+                    }
+                }
+            }).then((Delete) => {
+                if (Delete) {
+                    console.log($(e.target).attr('href'));
+                    $.get($(e.target).attr('href'), function (e) {
+                        swal({
+                            title: 'Deleted!',
+                            text: 'User account has been deleted.',
+                            icon: 'success',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        });
+                    }).fail(function (e) {
+                        swal({
+                            title: 'Error!',
+                            text: e.responseText,
+                            icon: 'warning',
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        });
+                    })
+                } else {
+                    swal.close();
+                }
+            });
+        });
+
+        $('input[name="ModifyPassword"]').on('change', (e) => {
+            $('input[name="Password"]').attr('disabled', !$(e.target).is(':checked'));
+        });
+
+        $('form').submit((e) => {
+            e.preventDefault();
+            let messageContent = document.createElement("pre");
+            $.ajax({
+                url: $(e.target).attr('action'),
+                type: $(e.target).attr('method'),
+                data: $(e.target).serialize(),
+                success: function (data) {
+                    messageContent.innerHTML = data['Message'];
+                    swal({
+                        title: data['Title'],
+                        content: messageContent,
+                        icon: data['Icon'],
+                        timer: 10000,
+                        buttons: false
+                    });
+                }
+            }).fail(function (e) {
+                let data = e.responseJSON;
+                messageContent.innerHTML = data['Message'];
+                swal({
+                    title: data['Title'],
+                    content: messageContent,
+                    icon: data['Icon'],
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

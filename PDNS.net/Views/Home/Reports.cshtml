@@ -1,0 +1,145 @@
+﻿@model IEnumerable<PDNS.net.Models.Log>
+@{
+    ViewData["Title"] = "Statistics";
+}
+<div class="card">
+    <div class="card-header">
+        <div class="card-head-row">
+            <h4 class="card-title">Top Countries by Nodes</h4>
+            <div class="card-tools">
+                <button class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card"><span class="fa fa-sync-alt"></span></button>
+                <button class="btn btn-icon btn-link btn-primary btn-xs btn-close-card"><span class="fa fa-times"></span></button>
+            </div>
+        </div>
+        <p class="card-category">
+            Map of the distribution of registered servers
+        </p>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div id="map-info" class="table-responsive table-hover table-sales"></div>
+            </div>
+            <div class="col-md-6">
+                <div class="mapcontainer">
+                    <div id="map-vector" class="vmap"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Event Logs</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="eventTable" class="display table table-hover table-head-bg-primary">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.ID)</th>
+                        <th>@Html.DisplayNameFor(model => model.Type)</th>
+                        <th>@Html.DisplayNameFor(model => model.User)</th>
+                        <th>@Html.DisplayNameFor(model => model.Time)</th>
+                        <th>@Html.DisplayNameFor(model => model.Title)</th>
+                        <th>@Html.DisplayNameFor(model => model.RecordID)</th>
+                        <th>@Html.DisplayNameFor(model => model.Data)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.ID)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                            <td>@Html.DisplayFor(modelItem => item.User.UserName)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Time)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                            <td>@Html.DisplayFor(modelItem => item.RecordID)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Data)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section Styles {
+    <style>
+        .swal-overlay {
+            background: none;
+        }
+
+        .swal-modal {
+            background-color: #f1f1f1;
+            vertical-align: top;
+        }
+    </style>
+}
+@section Scripts {
+    <!-- jQuery Vector Maps -->
+    <script src="~/assets/js/plugin/jqvmap/jquery.vmap.min.js"></script>
+    <script src="~/assets/js/plugin/jqvmap/maps/jquery.vmap.world.js"></script>
+    <!-- Datatables -->
+    <script src="~/assets/js/plugin/datatables/datatables.min.js"></script>
+    <!-- Bootstrap Notify -->
+    <script src="~/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+    <!-- SweetAlert -->
+    <script src="~/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // JQVmap
+            $.get("./Map", function (data) {
+                let regions = new Array;
+                $('#map-info').html(data);
+                $('#map-info table td:first-child').each(function () {
+                    if ($(this).text() != 'private') {
+                        regions.push($(this).text());
+                    }
+                });
+
+                $('#map-vector').vectorMap(
+                    {
+                        map: 'world_en',
+                        backgroundColor: 'transparent',
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        color: '#e4e4e4',
+                        enableZoom: true,
+                        hoverColor: '#35cd3a',
+                        hoverOpacity: null,
+                        normalizeFunction: 'linear',
+                        scaleColors: ['#b6d6ff', '#005ace'],
+                        selectedColor: '#35cd3a',
+                        selectedRegions: regions,
+                        showTooltip: true,
+                        onRegionClick: function (element, code, region) {
+                            return false;
+                        }
+                    }
+                );
+            });
+
+            let eventTable = $('#eventTable');
+            let etLastTD = $('#eventTable tr td:last-child');
+
+            eventTable.DataTable({
+                searching: false,
+                info: false,
+                ordering: false,
+                "pageLength": 10,
+            });
+
+            etLastTD.on('click', (e) => {
+                swal({
+                    title: "",
+                    text: $(e.target).html().replaceAll(" ", "<br />"),
+                    type: "success",
+                    timer: 10000,
+                    buttons: false
+                });
+            });
+        });
+    </script>
+}

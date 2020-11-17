@@ -1,0 +1,22 @@
+﻿@{
+    Dictionary<string, PingResult> ServerStatus = ViewBag.ServerStatus;
+    foreach (var Server in ServerStatus)
+    {
+        <div class="card bg-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="text-muted font-weight-bold">@Server.Key</h5>
+                    </div>
+                    <h5 class="text-info fw-bold">@Server.Value.Delay ms</h5>
+                </div>
+                <div class="progress progress-sm">
+                    <div class="progress-bar bg-warning-gradient w-@Server.Value.SuccessPercentage" role="progressbar" aria-valuenow="@Server.Value.SuccessPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="mt-1">
+                    <p class="text-danger mb-0">Lost @(100 - Server.Value.SuccessPercentage)%</p>
+                </div>
+            </div>
+        </div>
+    }
+}

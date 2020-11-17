@@ -1,0 +1,62 @@
+﻿/* Basic Settings: Start */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    background-color: #03040b;
+}
+
+header, main, footer {
+    width: 100%;
+    margin: 0;
+}
+
+header {
+    height: 50px;
+}
+
+main {
+}
+
+footer {
+    height: 100px;
+}
+/* Basic Settings: End */
+
+/* Left Menu: Start */
+.main-menu {
+    position: absolute;
+    padding: 0;
+    top: 0;
+    width: 20%;
+    height: 100%;
+    text-align: center;
+    background-color: #413c59;
+}
+
+.main-menu .logo {
+    width: 70%;
+    margin: 20px 5px .3rem 5px;
+}
+
+.main-menu li {
+    text-align: left;
+    width: 100%;
+    list-style: none;
+    color: #636895;
+}
+.main-menu li.active {
+    color: #a7add5;
+    border-right: 2px solid red;
+}
+
+.main-menu li i {
+    margin: 0 5px 0 10px;
+}
+.main-menu li.active i {
+    color: red !important;
+}
+/* Left Menu: End */

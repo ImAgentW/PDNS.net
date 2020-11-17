@@ -1,0 +1,101 @@
+﻿@using PDNS.net.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Caching.Memory
+@inject UserManager<User> _userManager
+@inject IMemoryCache _cache
+@{ 
+    var CurrentUser = await _userManager.GetUserAsync(this.User);
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"] - pDNS.net</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+    <link rel="icon" href="~/assets/img/icon.ico" type="image/x-icon" />
+
+    <!-- Fonts and icons -->
+    <script src="~/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+        WebFont.load({
+            google: { "families": ["Lato:300,400,700,900"] },
+            custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/assets/css/fonts.min.css'] },
+            active: function () {
+                sessionStorage.fonts = true;
+            }
+        });
+    </script>
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/assets/css/atlantis.css">
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="~/assets/css/theme.css">
+    <!-- Coloring -->
+    <link rel="stylesheet" href="~/assets/css/coloring.css">
+    <link rel="stylesheet" href="~/assets/css/custom.css">
+    @RenderSection("Styles", required: false)
+</head>
+
+<body data-background-color="dark">
+    <div class="wrapper">
+        <div class="main-header">
+            <partial name="_HeaderLogo" />
+            <partial name="_NavBar" model="@CurrentUser" />
+        </div>
+        <partial name="_SideBar" model="@CurrentUser" />
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    @RenderBody()
+                </div>
+            </div>
+            <partial name="_Footer" />
+        </div>
+        <partial name="_ThemeSwitcher" />
+    </div>
+
+    <!-- Core JS Files -->
+    <script src="~/assets/js/core/jquery.3.2.1.min.js"></script>
+    <script src="~/assets/js/core/popper.min.js"></script>
+    <script src="~/assets/js/core/bootstrap.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="~/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="~/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+    <!-- jQuery Scrollbar -->
+    <script src="~/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <!-- assets JS -->
+    <script src="~/assets/js/atlantis.min.js"></script>
+    <!-- assets Theme Switching -->
+    <script src="~/assets/js/setting-theme.js"></script>
+    <script>
+    /*
+                $('form').submit(function (e) {
+                    e.preventDefault();
+                    console.log($(e.target));
+                    $.ajax({
+                        url: $(e.target).attr('href'),
+                        type: 'POST',
+                        data: $(e.target).serialize(),
+                        success: function (data) {
+                            console.log(data);
+                        }
+                    });
+                });*/
+    </script>
+    @if (Context.Request.Path != "/")
+    {
+        <script>
+            $('li.active').removeClass('active');
+            let a = $('a[href="@ViewData["side-menu"]"]');
+            let navItem = a.parents('li.nav-item');
+            navItem.addClass('active submenu');
+            navItem.children('.collapsed').removeClass('collapsed').attr('aria-expanded', 'true');
+            navItem.children('div.collapse').addClass('show');
+            a.parent().addClass('active');
+        </script>
+    }
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

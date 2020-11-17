@@ -1,0 +1,287 @@
+﻿
+@{
+    ViewData["Title"] = "Dashboard";
+    PingResult UPTime = ViewBag.UpTime;
+    List<string> Clients = (List<string>)ViewData["Clients"];
+}
+
+
+<div class="mt-2 mb-4">
+    <h2 class="text-white pb-2">Welcome back, Root!</h2>
+    <h5 class="text-white op-7 mb-4">Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.</h5>
+</div>
+<div class="row row-card-no-pd">
+    <div class="col-sm-6 col-md-4">
+        <div class="card card-stats card-round">
+            <div class="card-body ">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="flaticon-users text-warning"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">Users</p>
+                            <h4 class="card-title">@ViewData["UsersCount"]</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="card card-stats card-round">
+            <div class="card-body ">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="flaticon-diagram text-success"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">Domains</p>
+                            <h4 class="card-title">@ViewData["DomainsCount"]</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="flaticon-up-arrow text-danger"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">UP-Time</p>
+                            <h4 class="card-title">@UPTime.Delay ms</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row row-card-no-pd">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-head-row">
+                    <h4 class="card-title">Top Countries by Nodes</h4>
+                    <div class="card-tools">
+                        <button class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card"><span class="fa fa-sync-alt"></span></button>
+                        <button class="btn btn-icon btn-link btn-primary btn-xs btn-close-card"><span class="fa fa-times"></span></button>
+                    </div>
+                </div>
+                <p class="card-category">
+                    Map of the distribution of registered servers
+                </p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id="map-info" class="table-responsive table-hover table-sales"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mapcontainer">
+                            <div id="map-vector" class="vmap"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-head-row">
+                    <div class="card-title">Server Status</div>
+                    <div class="card-tools">
+                        <button class="btn btn-icon btn-link btn-primary btn-xs btn-refresh-card" onclick="refreshPing()">
+                            <span class="fa fa-sync-alt"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="server-status">
+                <span>Test</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-head-row">
+                    <div class="card-title">Quick Add</div>
+                    <div class="card-tools">
+                        <ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-sm" id="pills-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="qapanel-domain" data-toggle="pill" href="#qadd-domains" role="tab" aria-selected="true">Domain</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="qapanel-user" data-toggle="pill" href="#qadd-user" role="tab" aria-selected="false">User</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="tab-content mt-2 mb-3" id="pills-without-border-tabContent">
+                    <div class="tab-pane fade show active" id="qadd-domains" role="tabpanel" aria-labelledby="qapanel-domain">
+                        <form asp-controller="Domains" asp-action="Add" method="POST">
+                            <div class="form-group form-group-default">
+                                <label>Type</label>
+                                <select class="form-control" name="Type">
+                                    <option>Master</option>
+                                    <option>Native</option>
+                                    <option>Slave</option>
+                                </select>
+                            </div>
+                            <div class="form-group form-group-default">
+                                <label>Name</label>
+                                <input name="Name" type="text" class="form-control" placeholder="example.com">
+                            </div>
+                            <div class="form-group form-group-default">
+                                <label>Primary</label>
+                                <input name="Primary" type="text" class="form-control" placeholder="ns1.example.com">
+                            </div>
+                            <div class="form-group form-group-default">
+                                <label>Email</label>
+                                <input name="Email" type="email" class="form-control" placeholder="webmaster@example.com">
+                            </div>
+                            <div class="row">
+                                <div class="form-group form-group-default col-5 mx-auto">
+                                    <label>Refresh</label>
+                                    <input name="Refresh" type="number" class="form-control" placeholder="86400">
+                                </div>
+                                <div class="form-group form-group-default col-5 mx-auto">
+                                    <label>Expire</label>
+                                    <input name="Expire" type="number" class="form-control" placeholder="3600000">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group form-group-default col-5 mx-auto">
+                                    <label>Retry</label>
+                                    <input name="Retry" type="number" class="form-control" placeholder="7200">
+                                </div>
+                                <div class="form-group form-group-default col-5 mx-auto">
+                                    <label>TTL</label>
+                                    <input name="TTL" type="number" class="form-control" placeholder="1800">
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <button type="submit" class="col-5 mx-auto btn btn-success">Submit</button>
+                                <button type="reset" class="col-5 mx-auto btn btn-danger">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="qadd-user" role="tabpanel" aria-labelledby="qapanel-user">
+                        <form asp-controller="Users" asp-action="Add" method="POST" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="name-input">
+                                            <i class="fa fa-user"></i>
+                                        </span>
+                                    </div>
+                                    <input id="name" name="Name" type="text" class="form-control" placeholder="John Doe" aria-label="Name" aria-describedby="name-input">
+                                </div>
+                                <label for="birthday">Birthday</label>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="birthday-input">
+                                            <i class="fa fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input id="birthday" name="Birthday" type="text" class="form-control" placeholder="2000/03/23" aria-label="Name" aria-describedby="birthday-input">
+                                </div>
+                                <label for="email">Email</label>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="email-input">
+                                            <i class="fa fa-envelope"></i>
+                                        </span>
+                                    </div>
+                                    <input id="email" name="Email" type="text" class="form-control" placeholder="john@pdns.net" aria-label="Email" aria-describedby="email-input">
+                                </div>
+                                <label for="username">Username</label>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="username-input">
+                                            <i class="fa fa-at"></i>
+                                        </span>
+                                    </div>
+                                    <input id="username" name="Username" type="text" class="form-control" placeholder="john" aria-label="Username" aria-describedby="username-input">
+                                </div>
+                                <label for="password">Password</label>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="fa fa-key"></i>
+                                        </span>
+                                    </div>
+                                    <input id="password" name="Password" type="password" class="form-control" placeholder="********" aria-label="Password" aria-describedby="basic-addon2">
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <button type="submit" class="btn btn-success col-5 mx-auto">Submit</button>
+                                <button type="reset" class="btn btn-danger col-5 mx-auto">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-primary bg-warning-gradient">
+            <div class="card-body">
+                <h4 class="mt-3 b-b1 pb-2 mb-3 fw-bold">Active client right now</h4>
+                <h2 class="mb-4 fw-bold">@Clients.Count</h2>
+                <h4 class="mt-3 b-b1 pb-2 mb-3 fw-bold">Top used server</h4>
+                <ul class="list-unstyled">
+                    @foreach (var client in Clients)
+                    {
+                        <li class="d-flex justify-content-between pb-1 pt-1"><small>@client</small> <span>10</span></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    <!-- DateTimePicker -->
+    <link rel="stylesheet" href="~/assets/css/plugin/datepicker/bootstrap-datepicker3.min.css" />
+    <link rel="stylesheet" href="~/assets/css/plugin/datepicker/theme.css" />
+}
+@section Scripts {
+    <!-- Chart JS -->
+    <script src="~/assets/js/plugin/chart.js/chart.min.js"></script>
+    <!-- jQuery Sparkline -->
+    <script src="~/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+    <!-- Chart Circle -->
+    <script src="~/assets/js/plugin/chart-circle/circles.min.js"></script>
+    <!-- Bootstrap Notify -->
+    <script src="~/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+    <!-- jQuery Vector Maps -->
+    <script src="~/assets/js/plugin/jqvmap/jquery.vmap.min.js"></script>
+    <script src="~/assets/js/plugin/jqvmap/maps/jquery.vmap.world.js"></script>
+    <!-- Sweet Alert -->
+    <script src="~/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <!-- Moment JS -->
+    <script src="~/assets/js/plugin/moment/moment.min.js"></script>
+    <!-- DateTimePicker -->
+    <script src="~/assets/js/plugin/datepicker/bootstrap-datepicker.min.js"></script>
+    <!-- Page Scripts -->
+    <script src="~/assets/js/index.js"></script>
+}

@@ -1,0 +1,360 @@
+﻿@model IEnumerable<Record>
+@using System.Text.RegularExpressions
+@using PDNS.net.Models
+@{
+    ViewData["Title"] = "Edit";
+    PDNS.net.Models.Domain domain = (PDNS.net.Models.Domain)ViewBag.Domain;
+    Record SOA = Model.Where(x => x.Type.ToUpper() == "SOA").SingleOrDefault();
+    string[] content = SOA.Content.Split(' ');
+    /* mail */
+    string[] EmailParts = content[1].Split('.');
+    string EmailSite = EmailParts[EmailParts.Count() - 2] + "." + EmailParts[EmailParts.Count() - 1];
+    /* mail */
+    string primary = content[0],
+    email = new Regex(Regex.Escape("." + EmailSite), RegexOptions.RightToLeft).Replace(content[1], "@" + EmailSite, 1);
+    int refresh = int.Parse(content[3]),
+    expire = int.Parse(content[4]),
+    retry = int.Parse(content[5]),
+    ttl = SOA.TTL;
+}
+<!-- Edit Domain Card -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-head-row">
+            <h4 class="card-title">Manage Domain</h4>
+        </div>
+        <p class="card-desc">@domain.Name</p>
+    </div>
+    <div class="card-body">
+        <form asp-controller="Domains" asp-action="Edit" method="POST">
+            <input type="hidden" name="ID" value="@domain.ID">
+            <div class="row">
+                <div class="form-group form-group-default mx-auto col-sm-11 col-md-5">
+                    <label>Primary</label>
+                    <input id="Primary" name="Primary" type="text" class="form-control" value="@primary">
+                </div>
+                <div class="form-group form-group-default mx-auto col-sm-11 col-md-5">
+                    <label>Email</label>
+                    <input id="Email" name="Email" type="email" class="form-control" value="@email">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group form-group-default col-sm-4 col-md-2 mx-auto">
+                    <label>Refresh</label>
+                    <input id="Refresh" name="Refresh" type="number" class="form-control" value="@refresh">
+                </div>
+                <div class="form-group form-group-default col-sm-4 col-md-2 mx-auto">
+                    <label>Expire</label>
+                    <input id="Expire" name="Expire" type="number" class="form-control" value="@expire">
+                </div>
+                <div class="form-group form-group-default col-sm-4 col-md-2 mx-auto">
+                    <label>Retry</label>
+                    <input id="Retry" name="Retry" type="number" class="form-control" value="@retry">
+                </div>
+                <div class="form-group form-group-default col-sm-4 col-md-2 mx-auto">
+                    <label>TTL</label>
+                    <input id="TTL" name="TTL" type="number" class="form-control" value="@ttl">
+                </div>
+            </div>
+            <div class="row form-group">
+                <button type="submit" class="col-5 mx-auto btn btn-success">Submit</button>
+                <button type="reset" class="col-5 mx-auto btn btn-danger">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View Records Card -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-head-row">
+            <h4 class="card-title">Manage Records</h4>
+            <div class="card-tools">
+                <a data-toggle="modal" data-target="#add-record-modal" class="btn btn-link btn-primary btn-lg" data-original-title="Add">
+                    <i class="fa fa-plus"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="table-responsive">
+                <table id="multi-filter-select" class="display table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.ID)</th>
+                            <th>@Html.DisplayNameFor(model => model.Name)</th>
+                            <th>@Html.DisplayNameFor(model => model.Type)</th>
+                            <th>@Html.DisplayNameFor(model => model.Content)</th>
+                            <th>@Html.DisplayNameFor(model => model.TTL)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            if (item.Type.ToUpper() == "SOA") continue;
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.ID)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Content)</td>
+                                <td>@Html.DisplayFor(modelItem => item.TTL)</td>
+                                <td>
+                                    <div class="form-button-action">
+                                        <a data-toggle="modal" data-target="#edit-record-modal" class="btn btn-link btn-primary btn-lg"
+                                           data-original-title="Edit" data-id="@item.ID">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a onclick="removeRecord(event, @item.ID)"
+                                           data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Record Modal -->
+<div class="modal" tabindex="-1" role="dialog" id="add-record-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div data-background-color="dark2" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Record</h5>
+                <a class="close btn btn-link btn-primary btn-lg" data-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </a>
+            </div>
+            <div class="modal-body">
+                <form id="add-record-form" asp-controller="Domains" asp-action="AddRecord" method="POST">
+                    <input type="hidden" name="DomainID" value="@domain.ID">
+                    <div class="form-group">
+                        <label for="add-name">Name</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="add-name" name="Name" aria-describedby="name-label">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="name-label">.@domain.Name</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-type">Type</label>
+                        <select class="form-control form-control" id="add-type" name="Type">
+                            @foreach (Record.RecordType type in Enum.GetValues(typeof(Record.RecordType)))
+                            {
+                                if (type == Record.RecordType.SOA) continue;
+                                <option>@type.ToString()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-content">Content</label>
+                        <input type="text" class="form-control" name="Content" id="add-content" />
+                    </div>
+                    <div class="form-group">
+                        <label for="add-ttl">TTL</label>
+                        <input type="number" class="form-control" name="TTL" placeholder="86400" id="add-ttl" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="$('#add-record-form').submit();">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Record Modal -->
+<div class="modal" tabindex="-1" role="dialog" id="edit-record-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div data-background-color="dark2" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Record</h5>
+                <a class="close btn btn-link btn-primary btn-lg" data-dismiss="modal" aria-label="Close">
+                    <i class="fa fa-times"></i>
+                </a>
+            </div>
+            <div class="modal-body">
+                <form id="edit-record-form" asp-controller="Domains" asp-action="EditRecord" method="POST">
+                    <div class="form-group d-none">
+                        <label>ID</label>
+                        <input id="edit-id" name="ID" type="hidden" class="form-control" value="1" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <div class="input-group">
+                            <input id="edit-name" name="Name" type="text" class="form-control" placeholder="www.example.com">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="name-label">.@domain.Name</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="edit-type" name="Type" class="form-control form-control">
+                            @foreach (Record.RecordType type in Enum.GetValues(typeof(Record.RecordType)))
+                            {
+                                if (type == Record.RecordType.SOA) continue;
+                                <option>@type.ToString()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mx-auto">
+                        <label>Content</label>
+                        <input id="edit-content" name="Content" type="text" class="form-control" placeholder="10.35.145.97">
+                    </div>
+                    <div class="form-group mx-auto">
+                        <label>TTL</label>
+                        <input id="edit-ttl" name="TTL" type="number" class="form-control" placeholder="86400">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="$('#edit-record-form').submit();">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- SweetAlert -->
+    <script src="/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <!-- Datatables -->
+    <script src="~/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script>
+        $(document).on('load', () => {
+            let table = $('#domains-table').DataTable({
+                "pageLength": 5
+            });
+            let domainQuery = '@domain';
+            if (domainQuery) {
+                table.column(0).search(domainQuery).draw();
+            }
+        });
+
+        $('form').submit((e) => {
+            e.preventDefault();
+            $.ajax({
+                url: $(e.target).attr('action'),
+                type: $(e.target).attr('method'),
+                data: $(e.target).serialize(),
+                success: function (data) {
+                    let messageContent = document.createElement("pre");
+                    messageContent.innerHTML = data['Message'];
+                    swal({
+                        title: data['Title'],
+                        content: messageContent,
+                        icon: data['Icon'],
+                        timer: 10000,
+                        buttons: false
+                    });
+                }
+            });
+            $.ajax({
+                url: $(e.target).attr('action'),
+                type: $(e.target).attr('method'),
+                data: $(e.target).serialize()
+            })
+                .done(function (data) {
+                    let messageContent = document.createElement("pre");
+                    messageContent.innerHTML = data['Message'];
+                    swal({
+                        title: data['Title'],
+                        content: messageContent,
+                        icon: data['Icon'],
+                        timer: 10000,
+                        buttons: false
+                    });
+                })
+                .fail(function (e) {
+                    let data = e.responseJSON;
+                    let messageContent = document.createElement("pre");
+                    messageContent.innerHTML = data['Message'];
+                    swal({
+                        title: data['Title'],
+                        content: messageContent,
+                        icon: data['Icon'],
+                        timer: 10000,
+                        buttons: false
+                    });
+                });
+        });
+
+        $('#edit-record-card .btn > .fa-times').on('click', (e) => {
+            $(e.target).parent('.card').addClass('d-none');
+        });
+
+        $('#edit-record-modal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var recipient = button.data('id');
+            var modal = $(this);
+            var a = button.closest('tr').children('td');
+            modal.find('.modal-title').text('Edit Record #' + recipient);
+            modal.find('#edit-id').val(a[0].innerHTML);
+            modal.find('#edit-name').val(a[1].innerHTML.replace('.@domain.Name', ''));
+            modal.find('#edit-type').val(a[2].innerHTML);
+            modal.find('#edit-content').val(a[3].innerHTML);
+            modal.find('#edit-ttl').val(a[4].innerHTML);
+        });
+
+        function removeRecord(e, id) {
+            console.log(e);
+            e.preventDefault();
+            swal({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                buttons: {
+                    confirm: {
+                        text: 'Yes, delete it!',
+                        className: 'btn btn-success'
+                    },
+                    cancel: {
+                        visible: true,
+                        className: 'btn btn-danger'
+                    }
+                }
+            }).then((Delete) => {
+                if (Delete) {
+                    let messageContent = document.createElement("pre");
+                    $.get('/Domains/DeleteRecord/' + id, function (data) {
+                        messageContent.innerHTML = data['Message'];
+                        swal({
+                            title: data['Title'],
+                            content: messageContent,
+                            icon: data['Icon'],
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        });
+                    }).fail(function (e) {
+                        let data = e.responseJSON;
+                        messageContent.innerHTML = data['Message'];
+                        swal({
+                            title: data['Title'],
+                            content: messageContent,
+                            icon: data['Icon'],
+                            buttons: {
+                                confirm: {
+                                    className: 'btn btn-success'
+                                }
+                            }
+                        });
+                    })
+                } else {
+                    swal.close();
+                }
+            });
+        };
+    </script>
+}

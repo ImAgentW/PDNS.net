@@ -1,0 +1,164 @@
+﻿@{
+    ViewData["Title"] = "New User";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-head-row">
+                    <h4 class="card-title">Register New User</h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Users" asp-action="Add" method="POST" enctype="multipart/form-data">
+                    <div class="form-group form-group-default">
+                        <label>Name</label>
+                        <div class="input-icon">
+                            <span class="input-icon-addon">
+                                <i class="fa fa-user"></i>
+                            </span>
+                            <input id="Name" name="Name" type="text" class="form-control" placeholder="John Doe">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Username</label>
+                        <div class="input-icon">
+                            <span class="input-icon-addon">
+                                <i class="fa fa-at"></i>
+                            </span>
+                            <input id="Username" name="Username" type="text" class="form-control" placeholder="john">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Email</label>
+                        <div class="input-icon">
+                            <span class="input-icon-addon">
+                                <i class="fa fa-envelope"></i>
+                            </span>
+                            <input id="Email" name="Email" type="email" class="form-control" placeholder="john.doe@email.com">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Password</label>
+                        <div class="input-icon">
+                            <span class="input-icon-addon">
+                                <i class="fa fa-key"></i>
+                            </span>
+                            <input id="Password" name="Password" type="password" class="form-control" placeholder="********">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Birthday</label>
+                        <div class="input-icon">
+                            <span class="input-icon-addon">
+                                <i class="fa fa-calendar-alt"></i>
+                            </span>
+                            <input id="Birthday" name="Birthday" type="text" class="form-control" placeholder="23/03/2000">
+                        </div>
+                    </div>
+                    <div class="form-group form-group-default md-form">
+                        <label>Profile</label>
+                        <div class="file-field">
+                            <div class="upload-btn-wrapper">
+                                <button class="btn btn-primary"><i class="fa fa-upload"></i> Upload Photo</button>
+                                <span>C:/Fakepath/</span>
+                                <input type="file" id="Profile" name="Profile" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <button type="submit" class="col-5 mx-auto btn btn-success">Submit</button>
+                        <button type="reset" class="col-5 mx-auto btn btn-danger">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    <!-- DateTimePicker -->
+    <link rel="stylesheet" href="~/assets/css/plugin/datepicker/bootstrap-datepicker3.min.css" />
+    <link rel="stylesheet" href="~/assets/css/plugin/datepicker/theme.css" />
+    <style>
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            padding-top: .5rem;
+        }
+
+            .upload-btn-wrapper input[type=file] {
+                font-size: 100px;
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: 0;
+            }
+
+            .upload-btn-wrapper span {
+                margin-left: 1rem;
+                width: 100%;
+                padding: .75rem 1.5rem;
+                border: 1px solid #2f374b;
+                border-radius: 3px;
+            }
+
+        .input-icon-addon {
+            left: .5rem !important;
+        }
+    </style>
+}
+@section Scripts {
+    <!-- Moment JS -->
+    <script src="~/assets/js/plugin/moment/moment.min.js"></script>
+    <!-- DateTimePicker -->
+    <script src="~/assets/js/plugin/datepicker/bootstrap-datepicker.min.js"></script>
+    <!-- SweetAlert -->
+    <script src="/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <script>
+        $('#Birthday').datepicker({
+            format: 'dd/mm/yyyy'
+        });
+
+        $('#Profile').on('change', (e) => {
+            $('.upload-btn-wrapper span').html($('#Profile').val());
+        });
+
+        $('form').submit((e) => {
+            e.preventDefault();
+            let messageContent = document.createElement("pre");
+            let formData = new FormData(e.target);
+            $.ajax({
+                url: $(e.target).attr('action'),
+                type: $(e.target).attr('method'),
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    messageContent.innerHTML = data['Message'];
+                    swal({
+                        title: data['Title'],
+                        content: messageContent,
+                        icon: data['Icon'],
+                        timer: 10000,
+                        buttons: false
+                    });
+                }
+            }).fail(function (e) {
+                let data = e.responseJSON;
+                messageContent.innerHTML = data['Message'];
+                swal({
+                    title: data['Title'],
+                    content: messageContent,
+                    icon: data['Icon'],
+                    buttons: {
+                        confirm: {
+                            className: 'btn btn-success'
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
